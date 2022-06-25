@@ -1,61 +1,46 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, Button, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Button, TextInput, FlatList } from 'react-native';
+import CiljPrikaz from './components/CiljPrikaz';
+import CiljUnos from './components/CiljUnos';
 
 export default function App() {
-  const [unos, postaviUnos] = useState('')
   const [ciljevi, postaviCiljeve] = useState([])
+  const [unosVidljiv, postaviVidljivost] = useState(false)
 
-  const dodajNovi = () => {
-    //console.log(unos);
-    postaviCiljeve(ciljevi.concat(unos))
-    //postaviUnos('')
-  }
-  const promjenaUnosa = (tekst) => {
-    postaviUnos(tekst);
-  }
+  const noviCilj = (unos) => {
+    const noviObjekt = {
+    value: unos,
+    key: Math.random().toString()
+    }
+    postaviCiljeve((ciljevi) => [...ciljevi, noviObjekt]);
+   };
+
+   const brisiCilj = (ciljID) => {
+    postaviCiljeve((ciljevi) => {
+      return ciljevi.filter((c) => c.key !== ciljID);
+    });
+   };
+  
   return (
     <View style={ stilovi.glavni }> 
-      <View>
-
-        <TextInput 
-        style={stilovi.unos} 
-        placeholder="Unesi novi cilj"
-        value={unos}
-        onChangeText={promjenaUnosa}
-        />
-
-        <Button title='Dodaj' onPress={dodajNovi}/>
-      </View>
-
-      <View>
-        {ciljevi.map((cilj) => (
-          <View key={cilj} style={stilovi.lista}>
-          <Text>{cilj}</Text>
-          </View>
-        ))}
-      </View>
+      <CiljUnos postaviCiljeve = {noviCilj}
+      vidljiv = {unosVidljiv}/>
+      <Button title='Novi unos' onPress={() =>
+      postaviVidljivost(true)} />
+      <CiljUnos vidljiv = {unosVidljiv}
+      postaviCiljeve={noviCilj} />
+      <FlatList data = {ciljevi}
+      renderItem = {(el) => <CiljPrikaz 
+        naslov = {el.item.value} 
+        brisanje = {brisiCilj} id = {el.item.key}/>}
+      />
     </View>
-    
-    
   );
 }
 
 const stilovi = StyleSheet.create({
   glavni: {
     margin: 50
-  },
-  unos: {
-    width: '70%',
-    marginBottom: 5, 
-    borderBottomColor: 'black', 
-    borderBottomWidth: 1 
-  },
-  lista: {
-    padding: 10,
-    marginVertical: 10,
-    backgroundColor: '#ccc',
-    borderColor: 'black',
-    borderWidth: 1
   }
 });
